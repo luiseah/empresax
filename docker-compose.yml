@@ -19,6 +19,8 @@ services:
       context: ./api
     external_links:
       - "gateway:dev.local"
+    depends_on:
+      - db
     links:
       - db
     volumes:
@@ -33,7 +35,8 @@ services:
     restart: unless-stopped
     container_name: db
     environment:
-      POSTGRES_USER: default
+      POSTGRES_DB: app
+      POSTGRES_USER: efiempresa
       POSTGRES_PASSWORD: secret
     volumes:
       - db-data:/var/lib/postgresql/data
