@@ -1,0 +1,53 @@
+services:
+  gateway:
+    image: nginx:alpine
+    container_name: gateway
+    ports:
+      - "80:80"
+    external_links:
+      - "gateway:dev.local"
+    volumes:
+      - .docker/nginx/:/etc/nginx/conf.d/
+    networks:
+      - efiempresa-network
+    depends_on:
+      - api
+
+  api:
+    container_name: api
+    build:
+      context: ./api
+    external_links:
+      - "gateway:dev.local"
+    links:
+      - db
+    volumes:
+      - ./api:/var/www
+    networks:
+      - efiempresa-network
+
+  db:
+    build:
+      context: .docker/pgsql
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    container_name: db
+    environment:
+      POSTGRES_USER: default
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - .docker/pgsql/init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+    networks:
+      - efiempresa-network
+
+networks:
+  efiempresa-network:
+    driver: bridge
+
+volumes:
+  redis:
+  db-data:
+    driver: local
