@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- *
+ * Product
  *
  * @property int $id
  * @property string $name
@@ -23,19 +23,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\User|null $user
  * @method static ProductBuilder|Product applyFilters(\Illuminate\Http\Request $request)
- * @method static ProductBuilder|Product byEan($code)
- * @method static ProductBuilder|Product byIds($ids)
- * @method static ProductBuilder|Product byName($name)
- * @method static ProductBuilder|Product byPrice($price)
- * @method static ProductBuilder|Product byStock($stock)
+ * @method static ProductBuilder|Product byEan(string $code)
+ * @method static ProductBuilder|Product byIds(\Illuminate\Support\Collection $ids)
+ * @method static ProductBuilder|Product byName(string $name)
+ * @method static ProductBuilder|Product byPrice(float $price)
+ * @method static ProductBuilder|Product byStock(int $stock)
  * @method static \Database\Factories\ProductFactory factory($count = null, $state = [])
  * @method static ProductBuilder|Product newModelQuery()
  * @method static ProductBuilder|Product newQuery()
  * @method static ProductBuilder|Product orderBys(\Illuminate\Http\Request $request)
- * @method static ProductBuilder|Product pagination($limit = 15)
+ * @method static ProductBuilder|Product pagination(int $limit = 15)
  * @method static ProductBuilder|Product query()
  * @method static ProductBuilder|Product s(string $input)
- * @method static ProductBuilder|Product statuses($status)
+ * @method static ProductBuilder|Product statuses(\Illuminate\Support\Collection $status)
  * @method static ProductBuilder|Product whereCreatedAt($value)
  * @method static ProductBuilder|Product whereEan13($value)
  * @method static ProductBuilder|Product whereId($value)
@@ -82,6 +82,7 @@ class Product extends Model
     {
         return [
             'status' => ProductStatusEnum::class,
+            'price' => 'float',
         ];
     }
 

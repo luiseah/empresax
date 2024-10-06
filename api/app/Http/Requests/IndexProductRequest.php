@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ProductStatusEnum;
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,6 +29,12 @@ class IndexProductRequest extends FormRequest
             'stock' => ['integer'],
             'price' => ['numeric'],
             'ean' => ['string'],
+
+            'statuses' => ['array', 'min:1'],
+            'statuses.*' => [Rule::enum(ProductStatusEnum::class)],
+
+            'ids' => ['array', 'min:1'],
+            'ids.*' => [Rule::exists(Product::class, 'id')],
 
             'orderBys' => ['sometimes', 'array'],
             'orderBys.*' => ['string', Rule::in('asc', 'desc')],

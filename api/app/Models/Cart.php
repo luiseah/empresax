@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- *
+ * Cart
  *
  * @property int $id
  * @property int $user_id
@@ -51,7 +51,8 @@ class Cart extends Model
     {
         return $this->belongsToMany(Product::class, 'cart_items')
             ->using(CartItem::class)
-            ->withPivot('quantity', 'subtotal', 'iva')
+            ->withPivot('quantity')
+            ->where('quantity', '>', 0)
             ->withTimestamps();
     }
 }

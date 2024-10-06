@@ -138,7 +138,7 @@ class ProductBuilder extends Builder
         }
 
         if ($request->has('name')) {
-            $this->byPrice($request->float('name'));
+            $this->byName($request->str('name'));
         }
 
         if ($request->has('price')) {
