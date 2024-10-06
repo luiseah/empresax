@@ -22,9 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::policy(Product::class, ProductPolicy::class);
-
-
         \Response::macro('api', function ($data, $message = null, $extra = [], $status = 200) {
             $attributes = $data instanceof \Illuminate\Pagination\LengthAwarePaginator
                 ? [...$data->toArray()]

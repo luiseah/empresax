@@ -11,8 +11,10 @@
         "laravel/tinker": "^2.9"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.1",
         "fakerphp/faker": "^1.23",
-        "laravel/pint": "^1.13",
+        "larastan/larastan": "^2.0",
+        "laravel/pint": "^1.17",
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
@@ -48,6 +50,14 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
+        ],
+        "generate": [
+            "@php artisan ide-helper:generate -W",
+            "@php artisan ide-helper:meta",
+            "@php artisan ide-helper:models -W -R"
+        ],
+        "larastan": [
+            "./vendor/bin/phpstan analyse --generate-baseline"
         ]
     },
     "extra": {

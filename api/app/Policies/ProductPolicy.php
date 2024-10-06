@@ -14,9 +14,8 @@ class ProductPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): Response
+    public function viewAny(?User $user): Response
     {
-
         return Response::allow();
     }
 
@@ -25,7 +24,7 @@ class ProductPolicy
      */
     public function view(User $user, Product $product): Response
     {
-        return access($user, 'view user')
+        return access($user, 'view Product')
             ? Response::allow()
             : Response::deny(__('You do not have permission to view this :resource.', [
                 'resource' => __('Product')
@@ -37,7 +36,7 @@ class ProductPolicy
      */
     public function create(User $user): Response
     {
-        return access($user, 'create user')
+        return access($user, 'create Product')
             ? Response::allow()
             : Response::deny(__('You do not have permission to create a :resource.', [
                 'resource' => __('Product')
@@ -49,7 +48,7 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): Response
     {
-        return access($user, 'update user')
+        return access($user, 'update Product')
             ? Response::allow()
             : Response::deny(__('You do not have permission to update this :resource.', [
                 'resource' => __('Product')
@@ -61,7 +60,7 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): Response
     {
-        return access($user, 'delete user')
+        return access($user, 'delete Product')
             ? Response::allow()
             : Response::deny(__('You do not have permission to delete this :resource.', [
                 'resource' => __('Product')

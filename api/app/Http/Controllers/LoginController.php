@@ -4,10 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-
 class LoginController extends Controller
 {
-    public function login(Request $request)
+    /**
+     * Login the user
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login(Request $request): \Illuminate\Http\JsonResponse
     {
         $this->validateLogin($request);
 
@@ -17,11 +22,18 @@ class LoginController extends Controller
             ], 401);
         }
         return response()->json([
-            'token' => $request->user()->createToken($request->device)->plainTextToken,
+            'token' => $request->user()?->createToken($request->str('device'))?->plainTextToken,
             'message' => 'Success'
         ]);
     }
-    public function validateLogin(Request $request)
+
+    /**
+     * Validate the login request
+     *
+     * @param Request $request
+     * @return array<string, string>
+     */
+    public function validateLogin(Request $request): array
     {
         return $request->validate([
             'email' => 'required|email',

@@ -2,17 +2,22 @@
 
 namespace App\Models\Builders;
 
+use App\Enums\ProductStatusEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
-
+/**
+ * @extends Builder<\App\Models\Product>
+ */
 class ProductBuilder extends Builder
 {
     /**
      *
+     * @param int $limit
      * @return mixed
      */
-    public function pagination($limit = 15)
+    public function pagination(int $limit = 15): mixed
     {
         return \Request::has('per_page')
             ? $this->paginate(\Request::integer('per_page', $limit))
@@ -20,38 +25,79 @@ class ProductBuilder extends Builder
     }
 
     /**
-     * @param $input
-     * @method search($input)
-     *
+     * @param string $input
      * @return $this
      */
-    public function s($input)
+    public function s(string $input): static
     {
-        $this->where(fn($q) => $q
-            ->orWhereRaw('s(price) LIKE s(?)', [s($input)])
-            ->orWhereRaw('s(ean_13) LIKE s(?)', [s($input)])
-            ->orWhereRaw('s(stock) LIKE s(?)', [s($input)]));
+        $this->where(fn(ProductBuilder $q) => $q
+            ->orWhere(fn(ProductBuilder $q) => $q->byName($input)));
 
         return $this;
     }
 
-    public function byPrice($price)
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function byName(string $name): static
+    {
+        $this->whereRaw('s(name) LIKE s(?)', [s($name)]);
+
+        return $this;
+    }
+
+    /**
+     * @param float $price
+     * @return $this
+     */
+    public function byPrice(float $price): static
     {
         $this->where('price', $price);
 
         return $this;
     }
 
-    public function byStock($stock)
+    /**
+     * @param int $stock
+     * @return $this
+     */
+    public function byStock(int $stock): static
     {
         $this->where('stock', $stock);
 
         return $this;
     }
 
-    public function byEan($code)
+    /**
+     * @param string $code
+     * @return $this
+     */
+    public function byEan(string $code): static
     {
-        $this->where('ean_13', $code);
+        $this->whereIn('ean_13', $code);
+
+        return $this;
+    }
+
+    /**
+     * @param Collection<int, int> $ids
+     * @return $this
+     */
+    public function byIds(Collection $ids): static
+    {
+        $this->find($ids);
+
+        return $this;
+    }
+
+    /**
+     * @param Collection<int, ProductStatusEnum> $status
+     * @return $this
+     */
+    public function statuses(Collection $status): static
+    {
+        $this->whereIn('status', $status);
 
         return $this;
     }
@@ -61,17 +107,19 @@ class ProductBuilder extends Builder
      *
      * @return $this
      */
-    public function orderBys(Request $request)
+    public function orderBys(Request $request): static
     {
         $orders = $request->input('orderBys', [
             'created_at' => 'desc',
         ]);
 
+        /** @var array<string, string> $orders */
         foreach ($orders as $name => $value) {
             match ($name) {
                 'name' => $this->orderBy(\DB::raw('lower(name)'), $value),
                 'created_at' => $this->orderBy('created_at', $value),
                 'updated_at' => $this->orderBy('updated_at', $value),
+                default => null,
             };
         }
 
@@ -83,10 +131,14 @@ class ProductBuilder extends Builder
      *
      * @return $this
      */
-    public function applyFilters(Request $request)
+    public function applyFilters(Request $request): static
     {
         if ($request->has('s')) {
             $this->s($request->str('s'));
+        }
+
+        if ($request->has('name')) {
+            $this->byPrice($request->float('name'));
         }
 
         if ($request->has('price')) {
@@ -94,11 +146,19 @@ class ProductBuilder extends Builder
         }
 
         if ($request->has('stock')) {
-            $this->byStock($request->float('stock'));
+            $this->byStock($request->integer('stock'));
         }
 
         if ($request->has('ean')) {
-            $this->byEan($request->float('ean'));
+            $this->byEan($request->str('ean'));
+        }
+
+        if ($request->has('ids')) {
+            $this->byIds($request->collect('ids'));
+        }
+
+        if ($request->has('statuses')) {
+            $this->statuses($request->collect('statuses'));
         }
 
         $this->orderBys($request);

@@ -1,2 +1,6 @@
 
 .idea/
+
+api/_ide_helper.php
+
+api/.phpstorm.meta.php

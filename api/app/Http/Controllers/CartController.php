@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCartRequest;
 use App\Models\Cart;
+use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 
@@ -11,21 +13,25 @@ class CartController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * @throws \Exception
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         /**
          * @var \App\Models\User $user
          */
         $user = $request->user();
 
-        return \Response::api($user->cart->load('items'));
+        $user->validateCart();
+
+        return \Response::api($user->cart?->load('items'));
     }
 
     /**
      * Store a newly created resource in storage.
+     * @throws \Exception
      */
-    public function store(StoreCartRequest $request)
+    public function store(StoreCartRequest $request): JsonResponse
     {
         /**
          * @var \App\Models\User $user
@@ -34,34 +40,45 @@ class CartController extends Controller
 
         $data = $request->collect('products')
             ->mapWithKeys(function ($product) {
-                $model = \App\Models\Product::find($product['product_id']);
+                $productId = data_get($product, 'product_id');
+                $quantity = data_get($product, 'quantity');
+
+                /**
+                 * @var \App\Models\Product $model
+                 */
+                $model = Product::findOrFail($productId);
+                $subTotal = $model->price * $quantity;
 
                 return [
-                    $product['product_id'] => [
-                        'quantity' => $product['quantity'],
-                        'subtotal' => $model->price * $product['quantity'],
-                        'iva' => $model->price * $product['quantity'] * Config::get('products.iva')
+                    $productId => [
+                        'quantity' => $quantity,
+                        'subtotal' => $subTotal,
+                        'iva' => $subTotal * Config::get('products.iva')
                     ]
                 ];
             })->toArray();
 
-        $user->cart->items()->sync($data);
+        $user->validateCart();
 
-        return \Response::api($user->cart->load('items'), __('Product added to cart successfully.'));
+        $user->cart?->items()->sync($data);
+
+        $user->cart?->load('items');
+
+        return \Response::api($user->cart, __('Product added to cart successfully.'));
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Cart $cart)
+    public function show(Cart $cart): JsonResponse
     {
-       return \Response::api($cart->load('items'));
+        return \Response::api($cart->load('items'));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Cart $cart)
+    public function destroy(Cart $cart): JsonResponse
     {
         $cart->items()->detach();
 

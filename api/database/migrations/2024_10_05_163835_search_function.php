@@ -8,17 +8,34 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
-        //
+        \DB::statement("CREATE EXTENSION IF NOT EXISTS unaccent");
+
+        \DB::statement('
+        CREATE OR REPLACE FUNCTION public.s(input text)
+        RETURNS text
+        LANGUAGE plpgsql
+        AS $function$
+        begin
+            return lower(unaccent(input));
+        END;
+        $function$
+        ;');
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        //
+        \DB::statement("DROP EXTENSION IF EXISTS unaccent");
+
+        \DB::statement('DROP FUNCTION IF EXISTS s(text);');
     }
 };

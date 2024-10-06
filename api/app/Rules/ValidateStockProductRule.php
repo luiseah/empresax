@@ -39,6 +39,9 @@ class ValidateStockProductRule implements ValidationRule, DataAwareRule
         $replace = Str::of($attribute)->replace('quantity', 'product_id');
         $product = data_get($this->data, $replace);
 
+        /**
+         * @var \App\Models\Product $product
+         */
         $product = Product::findOrFail($product);
 
         if ($product->stock < $value) {
